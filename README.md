@@ -65,3 +65,8 @@ type StringNode struct {
 - Code generation as string
 - Done in one go
 - No output to file yet and no execution
+
+## Sources
+- [The Super Tiny Compiler](https://github.com/jamiebuilds/the-super-tiny-compiler) by [Jamie Kyle](https://github.com/jamiebuilds)
+- [The Super Tiny Compiler's Walkthrough](https://citw.dev/tutorial/create-your-own-compiler) by (@yairhaimo)[https://twitter.com/yairhaimo]
+- [Writing a Compiler in Go](https://compilerbook.com)(book) by [Thorsten Ball](https://thorstenball.com)
