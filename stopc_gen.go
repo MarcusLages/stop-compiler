@@ -6,15 +6,13 @@ import (
 )
 
 const (
-	header string = `
-	#include <stdio.h>
-	#include <stdlib.h>
+	header string = `#include <stdio.h>
+#include <stdlib.h>
 
-	int main() {
-	`
-	footer string = `
-		return 0;
-	}
+int main() {
+`
+	footer string = `return 0;
+}
 	`
 )
 
@@ -24,6 +22,17 @@ func get_format_type(t SymbType) string {
 		return `"%s"`
 	case INT_TYPE:
 		return `"%d"`
+	default:
+		return ""
+	}
+}
+
+func get_var_declaration(name string, t SymbType) string {
+	switch t {
+	case STRING_TYPE:
+		return fmt.Sprintf("char %s[]", name)
+	case INT_TYPE:
+		return fmt.Sprintf("int %s", name)
 	default:
 		return ""
 	}
@@ -42,13 +51,17 @@ func gen_node(node Node, sa *SemanticAnalyzer) string {
 		}
 		return n.val
 	case *AssignNode:
-		return fmt.Sprintf("%s = %s;\n", n.id.id, gen_node(n.expr, sa))
+		t, _ := sa.node_type(n)
+		return fmt.Sprintf("%s = %s;\n",
+			get_var_declaration(n.id.id, t),
+			gen_node(n.expr, sa),
+		)
 	case *BinOpNode:
 		return fmt.Sprintf("(%s %s %s)", gen_node(n.left, sa), n.op, gen_node(n.right, sa))
 	case *PrintNode:
 		expr_type, _ := sa.node_type(n.expr)
 		format := get_format_type(expr_type)
-		return fmt.Sprintf("printf(%s, %s);", format, gen_node(n.expr, sa))
+		return fmt.Sprintf("printf(%s, %s);\n", format, gen_node(n.expr, sa))
 	case *IfNode:
 		var else_str string
 		if n.else_then != nil {
@@ -62,7 +75,7 @@ func gen_node(node Node, sa *SemanticAnalyzer) string {
 	case *BlockNode:
 		output := "{\n"
 		for _, inst := range n.nodes {
-			output += "\t" + gen_node(inst, sa) + "\n"
+			output += "" + gen_node(inst, sa) + "\n"
 		}
 		output += "}\n"
 		return output
