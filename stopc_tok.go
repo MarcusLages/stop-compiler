@@ -115,16 +115,11 @@ func Lexer(input string) []Token {
 				tokens = append(tokens, Token{TOKEN_CMP, "<"})
 				i++
 			}
-		case '>':
-			tokens = append(tokens, Token{TOKEN_CMP, ">"})
-		case '=':
-			tokens = append(tokens, Token{TOKEN_CMP, "="})
+		case '>', '=':
+			tokens = append(tokens, Token{TOKEN_CMP, string(ch)})
 			i++
-		case '-':
-			tokens = append(tokens, Token{TOKEN_OP, "-"})
-			i++
-		case '+':
-			tokens = append(tokens, Token{TOKEN_OP, "+"})
+		case '-', '+':
+			tokens = append(tokens, Token{TOKEN_OP, string(ch)})
 			i++
 		// Ignore any weird case
 		default:
