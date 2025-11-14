@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 // This Module represents the semantic analyzer.
 // Transforms an AST into a semantically correct annotated AST.
 // It also creates symbols to check if variables were created already
@@ -15,19 +17,29 @@ const (
 )
 
 type SemanticAnalyzer struct {
-	symbols map[string]string
-	errors  []string
+	symbols map[string]SymbType
+	errors  []error
 }
 
 func new_semantic_analyzer() *SemanticAnalyzer {
 	return &SemanticAnalyzer{
-		make(map[string]string),
-		[]string{},
+		make(map[string]SymbType),
+		[]error{},
 	}
+}
+
+func semantic_err(err_msg string) error {
+	return fmt.Errorf("[Semantic Error]: %s", err_msg)
+}
+
+func (sa *SemanticAnalyzer) check_node(node Node) {
 }
 
 // Analyzes the AST collecting errors and creating symbols
 // Type checking is done, but no type correction/
-func (sa *SemanticAnalyzer) analyze(ast AST) []string {
-
+func (sa *SemanticAnalyzer) analyze(ast AST) []error {
+	for node := range ast.nodes {
+		sa.check_node(node)
+	}
+	return sa.errors
 }
