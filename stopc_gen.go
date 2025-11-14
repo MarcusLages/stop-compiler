@@ -5,6 +5,11 @@ import (
 	"os"
 )
 
+// Module used for code generation, transforming a valid annotated AST
+// (using a SemanticAnalyzer) to generate C code.
+// All functions should be used with the precondition that they are valid and
+// annotated AST trees that were passed by from the SemanticAnalyzer
+
 const (
 	header string = `#include <stdio.h>
 #include <stdlib.h>
@@ -13,7 +18,7 @@ int main() {
 `
 	footer string = `return 0;
 }
-	`
+`
 )
 
 func get_format_type(t SymbType) string {

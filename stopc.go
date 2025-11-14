@@ -6,6 +6,8 @@ import (
 	"strings"
 )
 
+// Module created just to assemble all the parts together and use I/O
+
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Printf("Usage: go run %s <sourcefile>", os.Args[0])
