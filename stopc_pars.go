@@ -86,7 +86,7 @@ func (p *ParserState) eat(t TokenType) Token {
 		return cur
 	}
 	// Wrong expected token
-	return err_token(fmt.Sprintf("Expected: %d, Got: %v", t, cur.tk_type))
+	return err_token(fmt.Sprintf("Expected: %s, Got: %v", t, cur.tk_type))
 }
 
 // True if there's still tokens to parse

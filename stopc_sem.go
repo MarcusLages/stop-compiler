@@ -127,7 +127,7 @@ func (sa *SemanticAnalyzer) check_node(node Node) {
 			sa.errors = append(sa.errors, semantic_err(
 				fmt.Sprintf(
 					"Error in binary operation typing '%s': %s %s %s",
-					n.op, lh_type, rh_type,
+					n.op, lh_type, n.op, rh_type,
 				),
 			))
 			return
@@ -137,7 +137,7 @@ func (sa *SemanticAnalyzer) check_node(node Node) {
 			sa.errors = append(sa.errors, semantic_err(
 				fmt.Sprintf(
 					"Type mismatch in binary operation '%s': %s %s %s",
-					n.op, lh_type, rh_type,
+					n.op, lh_type, n.op, rh_type,
 				),
 			))
 		}

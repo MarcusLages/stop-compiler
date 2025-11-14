@@ -73,7 +73,7 @@ func Lexer(input string) []Token {
 			start := i
 			// Accepts chars or numbers after the first char
 			for i < len(input) &&
-				(unicode.IsLetter(rune(input[i])) || unicode.IsLetter(rune(input[i]))) {
+				(unicode.IsLetter(rune(input[i])) || unicode.IsDigit(rune(input[i]))) {
 				i++
 			}
 
