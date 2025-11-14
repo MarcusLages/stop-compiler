@@ -26,15 +26,20 @@ const (
 	TOKEN_EOF    TokenType = "EOF"  // Explicit end of file char
 
 	// Operators
-	TOKEN_OP TokenType = "OP" // Generic operator
-	TOKEN_EQ TokenType = "="
-	TOKEN_LT TokenType = "<"
-	TOKEN_GT TokenType = ">"
+	TOKEN_OP  TokenType = "OP" // Generic operator
+	TOKEN_CMP TokenType = "CMP"
+
+	// Token used in the lexer to inform unexpected tokens
+	TOKEN_ERR TokenType = "ERROR"
 )
 
 type Token struct {
 	tk_type TokenType
 	val     string
+}
+
+func err_token(err_msg string) Token {
+	return Token{TOKEN_ERR, err_msg}
 }
 
 func Lexer(input string) []Token {
@@ -107,11 +112,13 @@ func Lexer(input string) []Token {
 				tokens = append(tokens, Token{TOKEN_ASSIGN, "<-"})
 				i += 2
 			} else {
-				tokens = append(tokens, Token{TOKEN_LT, "<"})
+				tokens = append(tokens, Token{TOKEN_CMP, "<"})
 				i++
 			}
+		case '>':
+			tokens = append(tokens, Token{TOKEN_CMP, ">"})
 		case '=':
-			tokens = append(tokens, Token{TOKEN_EQ, "="})
+			tokens = append(tokens, Token{TOKEN_CMP, "="})
 			i++
 		case '-':
 			tokens = append(tokens, Token{TOKEN_OP, "-"})
