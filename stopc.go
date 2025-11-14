@@ -20,8 +20,12 @@ func main() {
 	}
 
 	tokens := Lexer(string(data))
-	Peek_lexer(tokens)
+	// Peek_lexer(tokens)
 
 	ast := Parser(tokens)
-	Peek_parser(ast)
+	// Peek_parser(ast)
+
+	sa_analyzer := new_semantic_analyzer()
+	sa_analyzer.analyze(ast)
+	Peek_semantic(sa_analyzer, ast)
 }

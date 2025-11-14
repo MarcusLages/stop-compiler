@@ -1,5 +1,7 @@
 x <- 2 + 7
+y <- |hello|
 escreva x
+escreva y
 se x < 0 va
     escreva(|stop|) 
 pare senao va

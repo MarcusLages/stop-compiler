@@ -172,3 +172,76 @@ func (sa *SemanticAnalyzer) analyze(ast AST) []error {
 	}
 	return sa.errors
 }
+
+func Peek_semantic_tree(node Node, indent string, sa *SemanticAnalyzer) {
+	switch n := node.(type) {
+	case *IdNode:
+		t, ok := sa.symbols[n.id]
+		typeStr := "undeclared"
+		if ok {
+			typeStr = string(t)
+		}
+		fmt.Println(indent + "Id: " + n.id + " : " + typeStr)
+	case *LitNode:
+		typ, _ := literal_type(*n)
+		fmt.Println(indent + "Literal: " + n.val + " : " + string(typ))
+	case *AssignNode:
+		fmt.Println(indent + "Assign:")
+		fmt.Println(indent + "  LHS:")
+		Peek_semantic_tree(n.id, indent+"    ", sa)
+		fmt.Println(indent + "  RHS:")
+		Peek_semantic_tree(n.expr, indent+"    ", sa)
+	case *BinOpNode:
+		fmt.Println(indent + "Op: " + n.op)
+		fmt.Println(indent + "  Left:")
+		Peek_semantic_tree(n.left, indent+"    ", sa)
+		fmt.Println(indent + "  Right:")
+		Peek_semantic_tree(n.right, indent+"    ", sa)
+	case *IfNode:
+		fmt.Println(indent + "If:")
+		fmt.Println(indent + "  Condition:")
+		Peek_semantic_tree(n.cond, indent+"    ", sa)
+		fmt.Println(indent + "  Then:")
+		Peek_semantic_tree(n.then, indent+"    ", sa)
+		if n.else_then != nil {
+			fmt.Println(indent + "  Else:")
+			Peek_semantic_tree(n.else_then, indent+"    ", sa)
+		}
+	case *PrintNode:
+		fmt.Println(indent + "Print:")
+		Peek_semantic_tree(n.expr, indent+"    ", sa)
+	case *BlockNode:
+		fmt.Println(indent + "Block:")
+		for i, child := range n.nodes {
+			fmt.Printf(indent+"  [%d]:\n", i)
+			Peek_semantic_tree(child, indent+"    ", sa)
+		}
+	case *ErrNode:
+		fmt.Println(indent + "Err: " + n.err_msg.Error())
+	default:
+		fmt.Println(indent + "Unknown node type")
+	}
+}
+
+func Peek_semantic(sa *SemanticAnalyzer, ast AST) {
+	fmt.Println("---- Semantic AST ----")
+	for i, node := range ast.nodes {
+		fmt.Printf("[%d]:\n", i)
+		Peek_semantic_tree(node, "  ", sa)
+	}
+
+	fmt.Println("---- Symbol Table ----")
+	for k, v := range sa.symbols {
+		fmt.Printf("%s : %s\n", k, v)
+	}
+
+	fmt.Println("---- Semantic Errors ----")
+	if len(sa.errors) == 0 {
+		fmt.Println("No errors found.")
+	} else {
+		for i, err := range sa.errors {
+			fmt.Printf("[%d]: %s\n", i, err.Error())
+		}
+	}
+	fmt.Println("----------------------")
+}
