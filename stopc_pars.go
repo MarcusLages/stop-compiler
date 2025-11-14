@@ -105,6 +105,7 @@ func (p *ParserState) parse_term() Node {
 		id := p.eat(TOKEN_ID)
 		return &IdNode{id.val}
 	default:
+		p.pos++
 		return parser_err_node("Not a valid expression term.")
 	}
 }
@@ -172,11 +173,13 @@ func (p *ParserState) parse_next() Node {
 
 		cond := p.parse_val_expr()
 		if is_parse_error(cond) {
+			p.pos++
 			return cond
 		}
 
 		then := p.parse_block()
 		if is_parse_error(then) {
+			p.pos++
 			return then
 		}
 
@@ -195,20 +198,25 @@ func (p *ParserState) parse_next() Node {
 		}
 		return &PrintNode{printable}
 	case TOKEN_LIT:
+		p.pos++
 		return parser_err_node(
 			fmt.Sprintf("Literal(%s) cannot appear as standalone expression.", cur.val),
 		)
 	case TOKEN_ELSE:
+		p.pos++
 		return parser_err_node(
 			fmt.Sprintf("`%s` doesn't have a respective `%s` block.", TOKEN_ELSE, TOKEN_IF),
 		)
 	case TOKEN_END:
+		p.pos++
 		return parser_err_node(
 			fmt.Sprintf("`%s` doesn't have a respective `%s` block.", TOKEN_END, TOKEN_DO),
 		)
 	case TOKEN_ASSIGN:
+		p.pos++
 		return parser_err_node("Isolated assignment. `<-` doesn't have an identifier.")
 	default:
+		p.pos++
 		return parser_err_node(
 			fmt.Sprintf("Invalid isolated command `%s`.", cur.val),
 		)
