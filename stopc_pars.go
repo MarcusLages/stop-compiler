@@ -35,6 +35,10 @@ type BinOpNode struct {
 	right Node
 }
 
+type ErrNode struct {
+	err_msg string
+}
+
 // Interface used to represent the AST tree itself
 type AST struct {
 	nodes    []Node
@@ -47,6 +51,10 @@ type AST struct {
 type ParserState struct {
 	tokens []Token
 	pos    int
+}
+
+func parser_err_node(err_msg string) Node {
+	return ErrNode{fmt.Sprintf("[Parsing Error] %s", err_msg)}
 }
 
 // Checks the current token to be parsed
@@ -74,6 +82,11 @@ func (p *ParserState) more() bool {
 
 func (p *ParserState) parse_next() Node {
 	cur := p.peek()
+
+	switch cur.tk_type {
+	default:
+		return parser_err_node("Unexpected command.")
+	}
 }
 
 func Parser(tokens []Token) AST {
