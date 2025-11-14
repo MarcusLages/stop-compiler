@@ -84,6 +84,29 @@ func (p *ParserState) more() bool {
 	return p.peek().tk_type != TOKEN_EOF
 }
 
+// Do-End block
+func (p *ParserState) parse_block() Node {
+	tok := p.eat(TOKEN_DO)
+	if tok.is_error() {
+		return parser_err_node(tok.val)
+	}
+
+	nodes := []Node{}
+
+	// Keep parsing until there's no more tokens or you find an END token
+	for p.peek().tk_type != TOKEN_END || p.more() {
+		nodes = append(nodes, p.parse_next())
+	}
+
+	// If you get to the end and there's no END token, throw error
+	if !p.more() {
+		return ErrNode{"Missing `PARE` statement."}
+	}
+
+	p.eat(TOKEN_END)
+	return BlockNode{nodes}
+}
+
 func (p *ParserState) parse_next() Node {
 	cur := p.peek()
 
@@ -105,21 +128,7 @@ func (p *ParserState) parse_next() Node {
 		lit := p.eat(TOKEN_LIT)
 		return LitNode{lit.val}
 	case TOKEN_DO:
-		p.eat(TOKEN_DO)
-		nodes := []Node{}
-
-		// Keep parsing until there's no more tokens or you find an END token
-		for p.peek().tk_type != TOKEN_END || p.more() {
-			nodes = append(nodes, p.parse_next())
-		}
-
-		// If you get to the end and there's no END token, throw error
-		if !p.more() {
-			return ErrNode{"Missing `PARE` statement."}
-		}
-
-		p.eat(TOKEN_END)
-		return BlockNode{nodes}
+		return p.parse_block()
 	case TOKEN_IF:
 	case TOKEN_PRINT:
 	case TOKEN_ASSIGN:
