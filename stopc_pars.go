@@ -48,8 +48,7 @@ type ErrNode struct {
 
 // Interface used to represent the AST tree itself
 type AST struct {
-	nodes    []Node
-	cur_node Node
+	nodes []Node
 }
 
 // Used to keep track of the parser in the peek/eat parser style
@@ -223,7 +222,7 @@ func Parser(tokens []Token) AST {
 		nodes = append(nodes, parser.parse_next())
 	}
 
-	return AST{nodes, nodes[0]}
+	return AST{nodes}
 }
 
 func Peek_parser_tree(node Node, indent string) {
