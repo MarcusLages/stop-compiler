@@ -13,9 +13,8 @@ type TokenType string
 
 const (
 	// Data types
-	TOKEN_ID  TokenType = "ID" // Identifiers, such as var names
-	TOKEN_INT TokenType = "INT"
-	TOKEN_STR TokenType = "STRING"
+	TOKEN_ID  TokenType = "ID"  // Identifiers, such as var names
+	TOKEN_LIT TokenType = "LIT" // Literal values
 
 	// Especial symbols
 	TOKEN_ASSIGN TokenType = "<-"
@@ -57,7 +56,7 @@ func Lexer(input string) []Token {
 				i++
 			}
 			// Not interested on the value, just its classification, so string is ok
-			tokens = append(tokens, Token{TOKEN_INT, input[start:i]})
+			tokens = append(tokens, Token{TOKEN_LIT, input[start:i]})
 			continue
 
 			// Check for string commands
@@ -95,7 +94,7 @@ func Lexer(input string) []Token {
 			for i < len(input) && rune(input[i]) != '>' {
 				i++
 			}
-			tokens = append(tokens, Token{TOKEN_STR, input[start:i]})
+			tokens = append(tokens, Token{TOKEN_LIT, input[start:i]})
 			i++ // Skip '>'
 			continue
 		}
