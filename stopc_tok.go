@@ -14,7 +14,7 @@ type TokenType string
 const (
 	// Data types
 	TOKEN_ID  TokenType = "ID"  // Identifiers, such as var names
-	TOKEN_LIT TokenType = "LIT" // Literal values
+	TOKEN_LIT TokenType = "LIT" // Literal values (int, string)
 
 	// Especial symbols
 	TOKEN_ASSIGN TokenType = "<-"
