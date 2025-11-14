@@ -167,6 +167,25 @@ func (p *ParserState) parse_next() Node {
 	case TOKEN_DO:
 		return p.parse_block()
 	case TOKEN_IF:
+		p.eat(TOKEN_IF)
+
+		cond := p.parse_val_expr()
+		if is_parse_error(cond) {
+			return cond
+		}
+
+		then := p.parse_block()
+		if is_parse_error(then) {
+			return then
+		}
+
+		var else_then Node = nil
+		if p.peek().tk_type == TOKEN_ELSE {
+			p.eat(TOKEN_ELSE)
+			else_then = p.parse_block()
+		}
+
+		return IfNode{cond, then, else_then}
 	case TOKEN_PRINT:
 	case TOKEN_ASSIGN:
 		return parser_err_node("Isolated assignment. `<-` doesn't an identifier.")
