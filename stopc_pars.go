@@ -149,21 +149,21 @@ func (p *ParserState) parse_next() Node {
 
 	switch cur.tk_type {
 	case TOKEN_ID:
-		id_tok := p.eat(TOKEN_ID)
-
-		// Differentiate ID vs ID Assignment
-		if p.peek().tk_type == TOKEN_ASSIGN {
-			p.eat(TOKEN_ASSIGN)
-			return AssignNode{
-				id:   IdNode{id_tok.val},
-				expr: p.parse_next(),
+		node := p.parse_val_expr()
+		switch id_node := node.(type) {
+		case IdNode:
+			if p.peek().tk_type == TOKEN_ASSIGN {
+				p.eat(TOKEN_ASSIGN)
+				return AssignNode{
+					id:   id_node,
+					expr: p.parse_val_expr(),
+				}
 			}
+		case ErrNode:
+			return id_node
+		default:
+			return id_node
 		}
-		return IdNode{id_tok.val}
-	case TOKEN_LIT:
-		// FIXME: WRONG, must check for operations
-		lit := p.eat(TOKEN_LIT)
-		return LitNode{lit.val}
 	case TOKEN_DO:
 		return p.parse_block()
 	case TOKEN_IF:
@@ -193,8 +193,23 @@ func (p *ParserState) parse_next() Node {
 			return printable
 		}
 		return PrintNode{printable}
+	case TOKEN_LIT:
+		lit_expr := p.parse_val_expr()
+		return lit_expr
+	case TOKEN_ELSE:
+		return parser_err_node(
+			fmt.Sprintf("`%d` doesn't have a respective `%d` block.", TOKEN_ELSE, TOKEN_IF),
+		)
+	case TOKEN_END:
+		return parser_err_node(
+			fmt.Sprintf("`%d` doesn't have a respective `%d` block.", TOKEN_END, TOKEN_DO),
+		)
 	case TOKEN_ASSIGN:
-		return parser_err_node("Isolated assignment. `<-` doesn't an identifier.")
+		return parser_err_node("Isolated assignment. `<-` doesn't have an identifier.")
+	default:
+		return parser_err_node(
+			fmt.Sprintf("Invalid isolated command `%d`.", cur.val),
+		)
 	}
 	return parser_err_node("Unexpected command.")
 }
