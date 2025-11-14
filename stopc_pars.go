@@ -84,6 +84,24 @@ func (p *ParserState) parse_next() Node {
 	cur := p.peek()
 
 	switch cur.tk_type {
+	case TOKEN_ID:
+		id_tok := p.eat(TOKEN_ID)
+
+		// Differentiate ID vs ID Assignment
+		if p.peek().tk_type == TOKEN_ASSIGN {
+			p.eat(TOKEN_ASSIGN)
+			return AssignNode{
+				id:   IdNode{id_tok.val},
+				expr: p.parse_next(),
+			}
+		} else {
+			return IdNode{id_tok.val}
+		}
+	case TOKEN_LIT:
+		lit := p.eat(TOKEN_LIT)
+		return LitNode{lit.val}
+	case TOKEN_ASSIGN:
+		return parser_err_node("Isolated assignment. `<-` doesn't an identifier.")
 	default:
 		return parser_err_node("Unexpected command.")
 	}
