@@ -21,9 +21,9 @@ const (
 func get_format_type(t SymbType) string {
 	switch t {
 	case STRING_TYPE:
-		return "%s"
+		return `"%s"`
 	case INT_TYPE:
-		return "%d"
+		return `"%d"`
 	default:
 		return ""
 	}
@@ -34,6 +34,12 @@ func gen_node(node Node, sa *SemanticAnalyzer) string {
 	case *IdNode:
 		return n.id
 	case *LitNode:
+		t, _ := literal_type(*n)
+		if t == STRING_TYPE {
+			// Remove the pipes (|) and add double quote (")
+			str := n.val[1 : len(n.val)-1]
+			return `"` + str + `"`
+		}
 		return n.val
 	case *AssignNode:
 		return fmt.Sprintf("%s = %s;\n", n.id.id, gen_node(n.expr, sa))
