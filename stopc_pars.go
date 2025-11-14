@@ -43,7 +43,7 @@ type BlockNode struct {
 }
 
 type ErrNode struct {
-	err_msg string
+	err_msg error
 }
 
 // Interface used to represent the AST tree itself
@@ -61,7 +61,7 @@ type ParserState struct {
 }
 
 func parser_err_node(err_msg string) Node {
-	return &ErrNode{fmt.Sprintf("[Parsing Error] %s", err_msg)}
+	return &ErrNode{fmt.Errorf("[Parsing Error] %s", err_msg)}
 }
 
 func is_parse_error(n Node) bool {
@@ -141,7 +141,7 @@ func (p *ParserState) parse_block() Node {
 
 	// If you get to the end and there's no END token, throw error
 	if !p.more() {
-		return &ErrNode{fmt.Sprintf("Missing `%s` statement.", TOKEN_END)}
+		return &ErrNode{fmt.Errorf("Missing `%s` statement.", TOKEN_END)}
 	}
 
 	p.eat(TOKEN_END)
@@ -264,7 +264,7 @@ func Peek_parser_tree(node Node, indent string) {
 			Peek_parser_tree(child, indent+"    ")
 		}
 	case *ErrNode:
-		fmt.Println(indent + "Err: " + n.err_msg)
+		fmt.Println(indent + "Err: " + n.err_msg.Error())
 	default:
 		fmt.Println(indent + "Unknown node type")
 	}
