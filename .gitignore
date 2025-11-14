@@ -1,1 +1,4 @@
 *.test.go
+*.c
+*.out
+*.exe

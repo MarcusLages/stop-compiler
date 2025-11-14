@@ -9,53 +9,39 @@ Parts not used or skipped for time consuming purposes:
 
 You can find an the target file that we want to compile for the `stop` language as `stop.stp`.
 
+## Example Code
+```
+x <- 2 + 7
+y <- |\nhello|
+escreva x
+escreva y
+se x < 0 va
+    escreva(\n|stop|\n) 
+pare senao va
+    escreva(\n|go|\n)
+pare
+```
+
 ## Lexical Analysis (`stop_tok.go`)
 Straight into tokens (no lexemes).
 These are the tokens available.
 ```go
-TOKEN_ID     = "ID"
-TOKEN_INT    = "INT"
-TOKEN_STRING = "STRING"
-TOKEN_ASSIGN = "<-"
-TOKEN_IF     = "SE"
-TOKEN_ELSE   = "SENAO"
-TOKEN_PRINT  = "ESCREVA"
-TOKEN_OP     = "OP"
-TOKEN_EQ     = "="
-TOKEN_OPEN   = "/"
-TOKEN_CLOSE  = "\\"
-TOKEN_EOF    = "EOF"
+TOKEN_ID  TokenType = "ID"
+TOKEN_LIT TokenType = "LIT"
+TOKEN_ASSIGN TokenType = "<-"
+TOKEN_IF     TokenType = "SE"
+TOKEN_ELSE   TokenType = "SENAO"
+TOKEN_PRINT  TokenType = "ESCREVA"
+TOKEN_DO     TokenType = "VA"
+TOKEN_END    TokenType = "PARE"
+TOKEN_EOF    TokenType = "EOF"
+TOKEN_OP  TokenType = "OP"
+TOKEN_CMP TokenType = "CMP"
+TOKEN_ERR TokenType = "ERROR"
 ```
 
 ## Synctatic Analysis (`stop_pars.go`)
-AST Nodes:
-```go
-type Node interface{}
-
-type AssignNode struct {
-	Name string
-	Expr Node
-}
-type BinOpNode struct {
-	Left  Node
-	Op    string
-	Right Node
-}
-type NumNode struct {
-	Val string
-}
-type IfNode struct {
-	Cond Node
-	Then Node
-	Else Node
-}
-type PrintNode struct {
-	Expr Node
-}
-type StringNode struct {
-	Val string
-}
-```
+- Parses the tokens into AST
 
 ## Semantic Analysis (`stop_sem.go`)
 - Basic tree traversal
@@ -65,6 +51,9 @@ type StringNode struct {
 - Code generation as string
 - Done in one go
 - No output to file yet and no execution
+
+## Limitations
+- Too many to count
 
 ## Sources
 - [The Super Tiny Compiler](https://github.com/jamiebuilds/the-super-tiny-compiler) by [Jamie Kyle](https://github.com/jamiebuilds)
