@@ -187,6 +187,12 @@ func (p *ParserState) parse_next() Node {
 
 		return IfNode{cond, then, else_then}
 	case TOKEN_PRINT:
+		p.eat(TOKEN_PRINT)
+		printable := p.parse_val_expr()
+		if is_parse_error(printable) {
+			return printable
+		}
+		return PrintNode{printable}
 	case TOKEN_ASSIGN:
 		return parser_err_node("Isolated assignment. `<-` doesn't an identifier.")
 	}

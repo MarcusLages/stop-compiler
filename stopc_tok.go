@@ -136,7 +136,7 @@ func Lexer(input string) []Token {
 	return tokens
 }
 
-func Peek_tokens(tokens []Token) {
+func Peek_lexer(tokens []Token) {
 	fmt.Println("---- Tokenizer/Lexer ----")
 	for i, tk := range tokens {
 		fmt.Printf("%d. %s(%s)\n", i, tk.tk_type, tk.val)

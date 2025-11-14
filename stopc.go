@@ -20,5 +20,5 @@ func main() {
 	}
 
 	tokens := Lexer(string(data))
-	Peek_tokens(tokens)
+	Peek_lexer(tokens)
 }
