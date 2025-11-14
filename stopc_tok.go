@@ -95,16 +95,15 @@ func Lexer(input string) []Token {
 			}
 			continue
 
-			// Take care of a string literal, differentiating its start from
-			// '<' and "<-"
-		} else if ch == '<' && i+1 < len(input) && input[i+1] != '-' {
+			// Take care of a string literal
+		} else if ch == '|' && i+1 < len(input) {
 			i++
 			start := i
-			for i < len(input) && rune(input[i]) != '>' {
+			for i < len(input) && rune(input[i]) != '|' {
 				i++
 			}
 			tokens = append(tokens, Token{TOKEN_LIT, input[start:i]})
-			i++ // Skip '>'
+			i++ // Skip second '|'
 			continue
 		}
 

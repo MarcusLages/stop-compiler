@@ -1,6 +1,7 @@
-x <- 2 - 2
-se x = 0 va
-    escreva(<stop>) 
+x <- 2 + 7
+escreva x
+se x < 0 va
+    escreva(|stop|) 
 pare senao va
-    escreva(<go>)
+    escreva(|go|)
 pare
