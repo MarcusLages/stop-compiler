@@ -12,13 +12,12 @@ You can find an the target file that we want to compile for the `stop` language 
 ## Example Code
 ```
 x <- 2 + 7
-y <- |\nhello|
-escreva x
+y <- |hello\n|
 escreva y
 se x < 0 va
-    escreva(\n|stop|\n) 
+    escreva(|stop|) 
 pare senao va
-    escreva(\n|go|\n)
+    escreva(|go|)
 pare
 ```
 
