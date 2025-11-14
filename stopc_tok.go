@@ -42,6 +42,10 @@ func err_token(err_msg string) Token {
 	return Token{TOKEN_ERR, err_msg}
 }
 
+func (t *Token) is_error() bool {
+	return t.tk_type == TOKEN_ERR
+}
+
 func Lexer(input string) []Token {
 	tokens := []Token{}
 	i := 0
