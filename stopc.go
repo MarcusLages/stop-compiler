@@ -21,4 +21,7 @@ func main() {
 
 	tokens := Lexer(string(data))
 	Peek_lexer(tokens)
+
+	ast := Parser(tokens)
+	Peek_parser(ast)
 }

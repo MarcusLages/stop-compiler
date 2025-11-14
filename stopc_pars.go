@@ -223,3 +223,57 @@ func Parser(tokens []Token) AST {
 
 	return AST{nodes, nodes[0]}
 }
+
+func Peek_parser_tree(node Node, indent string) {
+	switch n := node.(type) {
+	case IdNode:
+		fmt.Println(indent + "Id: " + n.id)
+	case LitNode:
+		fmt.Println(indent + "Literal: " + n.val)
+	case AssignNode:
+		fmt.Println(indent + "Assign:")
+		fmt.Println(indent + "  LHS:")
+		Peek_parser_tree(n.id, indent+"    ")
+		fmt.Println(indent + "  RHS:")
+		Peek_parser_tree(n.expr, indent+"    ")
+	case BinOpNode:
+		fmt.Println(indent + "Op: " + n.op)
+		fmt.Println(indent + "  Left:")
+		Peek_parser_tree(n.left, indent+"    ")
+		fmt.Println(indent + "  Right:")
+		Peek_parser_tree(n.right, indent+"    ")
+	case IfNode:
+		fmt.Println(indent + "If:")
+		fmt.Println(indent + "  Condition:")
+		Peek_parser_tree(n.cond, indent+"    ")
+		fmt.Println(indent + "  Then:")
+		Peek_parser_tree(n.then, indent+"    ")
+		if n.else_then != nil {
+			fmt.Println(indent + "  Else:")
+			Peek_parser_tree(n.else_then, indent+"    ")
+		}
+	case PrintNode:
+		fmt.Println(indent + "Print:")
+		Peek_parser_tree(n.expr, indent+"    ")
+	case BlockNode:
+		fmt.Println(indent + "Block:")
+		for i, child := range n.nodes {
+			fmt.Printf(indent+"  [%d]:\n", i)
+			Peek_parser_tree(child, indent+"    ")
+		}
+	case ErrNode:
+		fmt.Println(indent + "Err: " + n.err_msg)
+	default:
+		fmt.Println(indent + "Unknown node type")
+	}
+}
+
+// Helper for the AST root
+func Peek_parser(ast AST) {
+	fmt.Println("---- Parser AST ----")
+	for i, node := range ast.nodes {
+		fmt.Printf("[%d]:\n", i)
+		Peek_parser_tree(node, "  ")
+	}
+	fmt.Println("-------------------")
+}
