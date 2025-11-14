@@ -35,6 +35,10 @@ type BinOpNode struct {
 	right Node
 }
 
+type BlockNode struct {
+	nodes []Node
+}
+
 type ErrNode struct {
 	err_msg string
 }
@@ -100,6 +104,24 @@ func (p *ParserState) parse_next() Node {
 	case TOKEN_LIT:
 		lit := p.eat(TOKEN_LIT)
 		return LitNode{lit.val}
+	case TOKEN_DO:
+		p.eat(TOKEN_DO)
+		nodes := []Node{}
+
+		// Keep parsing until there's no more tokens or you find an END token
+		for p.peek().tk_type != TOKEN_END || p.more() {
+			nodes = append(nodes, p.parse_next())
+		}
+
+		// If you get to the end and there's no END token, throw error
+		if !p.more() {
+			return ErrNode{"Missing `PARE` statement."}
+		}
+
+		p.eat(TOKEN_END)
+		return BlockNode{nodes}
+	case TOKEN_IF:
+	case TOKEN_PRINT:
 	case TOKEN_ASSIGN:
 		return parser_err_node("Isolated assignment. `<-` doesn't an identifier.")
 	default:
