@@ -112,10 +112,10 @@ func (p *ParserState) parse_val_expr() Node {
 
 	// Parse binary operations
 	for p.peek().tk_type == TOKEN_OP || p.peek().tk_type == TOKEN_CMP {
-		op := p.eat(p.peek().tk_type)
-		right := p.parse_val_expr()
 		// Left hand gets included and now the operation becomes the root now
-		root_node = BinOpNode{op.val, root_node, right}
+		// Always add at the right so it all becomes left associative
+		op := p.eat(p.peek().tk_type)
+		root_node = BinOpNode{op.val, root_node, p.parse_term()}
 	}
 
 	return root_node
@@ -131,13 +131,13 @@ func (p *ParserState) parse_block() Node {
 	nodes := []Node{}
 
 	// Keep parsing until there's no more tokens or you find an END token
-	for p.peek().tk_type != TOKEN_END || p.more() {
+	for p.peek().tk_type != TOKEN_END && p.more() {
 		nodes = append(nodes, p.parse_next())
 	}
 
 	// If you get to the end and there's no END token, throw error
 	if !p.more() {
-		return ErrNode{"Missing `PARE` statement."}
+		return ErrNode{fmt.Sprintf("Missing `%s` statement.", TOKEN_END)}
 	}
 
 	p.eat(TOKEN_END)
@@ -198,17 +198,17 @@ func (p *ParserState) parse_next() Node {
 		return lit_expr
 	case TOKEN_ELSE:
 		return parser_err_node(
-			fmt.Sprintf("`%d` doesn't have a respective `%d` block.", TOKEN_ELSE, TOKEN_IF),
+			fmt.Sprintf("`%s` doesn't have a respective `%s` block.", TOKEN_ELSE, TOKEN_IF),
 		)
 	case TOKEN_END:
 		return parser_err_node(
-			fmt.Sprintf("`%d` doesn't have a respective `%d` block.", TOKEN_END, TOKEN_DO),
+			fmt.Sprintf("`%s` doesn't have a respective `%s` block.", TOKEN_END, TOKEN_DO),
 		)
 	case TOKEN_ASSIGN:
 		return parser_err_node("Isolated assignment. `<-` doesn't have an identifier.")
 	default:
 		return parser_err_node(
-			fmt.Sprintf("Invalid isolated command `%d`.", cur.val),
+			fmt.Sprintf("Invalid isolated command `%s`.", cur.val),
 		)
 	}
 	return parser_err_node("Unexpected command.")
@@ -221,5 +221,5 @@ func Parser(tokens []Token) AST {
 		nodes = append(nodes, parser.parse_next())
 	}
 
-	return AST{}
+	return AST{nodes, nodes[0]}
 }
