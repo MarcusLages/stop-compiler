@@ -1,5 +1,5 @@
 # STOP Compiler
-Toy compiler used as demonstration for a presentation on compilers.
+Toy compiler used for educational purposes to talk about and present the skeleton of compilers.
 Main purpose of the compiler is to compile the `stop.stp` file into a `.c` file.
 The different parts of the compiler are divided into 4 files + a `stop.go` used for general execution and I/O.
 Parts not used or skipped for time consuming purposes:
