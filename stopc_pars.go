@@ -2,6 +2,9 @@ package main
 
 import "fmt"
 
+// This Module represents the syntactic analyzer (or parser).
+// Parses a list of tokens into an AST.
+
 // Interface used to represent an AST Node
 type Node interface{}
 
@@ -15,7 +18,7 @@ type LitNode struct {
 }
 
 type AssignNode struct {
-	id   IdNode
+	id   *IdNode
 	expr Node
 }
 
@@ -58,11 +61,11 @@ type ParserState struct {
 }
 
 func parser_err_node(err_msg string) Node {
-	return ErrNode{fmt.Sprintf("[Parsing Error] %s", err_msg)}
+	return &ErrNode{fmt.Sprintf("[Parsing Error] %s", err_msg)}
 }
 
 func is_parse_error(n Node) bool {
-	if _, ok := n.(ErrNode); ok {
+	if _, ok := n.(*ErrNode); ok {
 		return true
 	} else {
 		return false
@@ -98,10 +101,10 @@ func (p *ParserState) parse_term() Node {
 	switch tok.tk_type {
 	case TOKEN_LIT:
 		lit := p.eat(TOKEN_LIT)
-		return LitNode{lit.val}
+		return &LitNode{lit.val}
 	case TOKEN_ID:
 		id := p.eat(TOKEN_ID)
-		return IdNode{id.val}
+		return &IdNode{id.val}
 	default:
 		return parser_err_node("Not a valid expression term.")
 	}
@@ -115,7 +118,8 @@ func (p *ParserState) parse_val_expr() Node {
 		// Left hand gets included and now the operation becomes the root now
 		// Always add at the right so it all becomes left associative
 		op := p.eat(p.peek().tk_type)
-		root_node = BinOpNode{op.val, root_node, p.parse_term()}
+		term := p.parse_term()
+		root_node = &BinOpNode{op.val, root_node, term}
 	}
 
 	return root_node
@@ -137,11 +141,11 @@ func (p *ParserState) parse_block() Node {
 
 	// If you get to the end and there's no END token, throw error
 	if !p.more() {
-		return ErrNode{fmt.Sprintf("Missing `%s` statement.", TOKEN_END)}
+		return &ErrNode{fmt.Sprintf("Missing `%s` statement.", TOKEN_END)}
 	}
 
 	p.eat(TOKEN_END)
-	return BlockNode{nodes}
+	return &BlockNode{nodes}
 }
 
 func (p *ParserState) parse_next() Node {
@@ -149,21 +153,19 @@ func (p *ParserState) parse_next() Node {
 
 	switch cur.tk_type {
 	case TOKEN_ID:
-		node := p.parse_val_expr()
-		switch id_node := node.(type) {
-		case IdNode:
-			if p.peek().tk_type == TOKEN_ASSIGN {
-				p.eat(TOKEN_ASSIGN)
-				return AssignNode{
-					id:   id_node,
-					expr: p.parse_val_expr(),
-				}
-			}
-		case ErrNode:
-			return id_node
-		default:
-			return id_node
+		// Parse possible assignment
+		id_tok := p.eat(TOKEN_ID)
+		id_node := &IdNode{id_tok.val}
+
+		if p.peek().tk_type == TOKEN_ASSIGN {
+			p.eat(TOKEN_ASSIGN)
+			expr := p.parse_val_expr()
+			return &AssignNode{id_node, expr}
 		}
+
+		return parser_err_node(
+			fmt.Sprintf("Standalone expressions like %s are not allowed.", id_tok.val),
+		)
 	case TOKEN_DO:
 		return p.parse_block()
 	case TOKEN_IF:
@@ -185,17 +187,18 @@ func (p *ParserState) parse_next() Node {
 			else_then = p.parse_block()
 		}
 
-		return IfNode{cond, then, else_then}
+		return &IfNode{cond, then, else_then}
 	case TOKEN_PRINT:
 		p.eat(TOKEN_PRINT)
 		printable := p.parse_val_expr()
 		if is_parse_error(printable) {
 			return printable
 		}
-		return PrintNode{printable}
+		return &PrintNode{printable}
 	case TOKEN_LIT:
-		lit_expr := p.parse_val_expr()
-		return lit_expr
+		return parser_err_node(
+			fmt.Sprintf("Literal(%s) cannot appear as standalone expression.", cur.val),
+		)
 	case TOKEN_ELSE:
 		return parser_err_node(
 			fmt.Sprintf("`%s` doesn't have a respective `%s` block.", TOKEN_ELSE, TOKEN_IF),
@@ -211,7 +214,6 @@ func (p *ParserState) parse_next() Node {
 			fmt.Sprintf("Invalid isolated command `%s`.", cur.val),
 		)
 	}
-	return parser_err_node("Unexpected command.")
 }
 
 func Parser(tokens []Token) AST {
@@ -226,23 +228,23 @@ func Parser(tokens []Token) AST {
 
 func Peek_parser_tree(node Node, indent string) {
 	switch n := node.(type) {
-	case IdNode:
+	case *IdNode:
 		fmt.Println(indent + "Id: " + n.id)
-	case LitNode:
+	case *LitNode:
 		fmt.Println(indent + "Literal: " + n.val)
-	case AssignNode:
+	case *AssignNode:
 		fmt.Println(indent + "Assign:")
 		fmt.Println(indent + "  LHS:")
 		Peek_parser_tree(n.id, indent+"    ")
 		fmt.Println(indent + "  RHS:")
 		Peek_parser_tree(n.expr, indent+"    ")
-	case BinOpNode:
+	case *BinOpNode:
 		fmt.Println(indent + "Op: " + n.op)
 		fmt.Println(indent + "  Left:")
 		Peek_parser_tree(n.left, indent+"    ")
 		fmt.Println(indent + "  Right:")
 		Peek_parser_tree(n.right, indent+"    ")
-	case IfNode:
+	case *IfNode:
 		fmt.Println(indent + "If:")
 		fmt.Println(indent + "  Condition:")
 		Peek_parser_tree(n.cond, indent+"    ")
@@ -252,16 +254,16 @@ func Peek_parser_tree(node Node, indent string) {
 			fmt.Println(indent + "  Else:")
 			Peek_parser_tree(n.else_then, indent+"    ")
 		}
-	case PrintNode:
+	case *PrintNode:
 		fmt.Println(indent + "Print:")
 		Peek_parser_tree(n.expr, indent+"    ")
-	case BlockNode:
+	case *BlockNode:
 		fmt.Println(indent + "Block:")
 		for i, child := range n.nodes {
 			fmt.Printf(indent+"  [%d]:\n", i)
 			Peek_parser_tree(child, indent+"    ")
 		}
-	case ErrNode:
+	case *ErrNode:
 		fmt.Println(indent + "Err: " + n.err_msg)
 	default:
 		fmt.Println(indent + "Unknown node type")
