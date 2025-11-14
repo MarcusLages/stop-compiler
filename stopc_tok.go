@@ -97,13 +97,13 @@ func Lexer(input string) []Token {
 
 			// Take care of a string literal
 		} else if ch == '|' && i+1 < len(input) {
-			i++
 			start := i
+			i++
 			for i < len(input) && rune(input[i]) != '|' {
 				i++
 			}
+			i++ // Add second '|'
 			tokens = append(tokens, Token{TOKEN_LIT, input[start:i]})
-			i++ // Skip second '|'
 			continue
 		}
 
