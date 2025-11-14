@@ -22,7 +22,7 @@ type AssignNode struct {
 type IfNode struct {
 	cond      Node
 	then      Node
-	else_then Node
+	else_then Node // Accepts nil
 }
 
 type PrintNode struct {
@@ -61,6 +61,14 @@ func parser_err_node(err_msg string) Node {
 	return ErrNode{fmt.Sprintf("[Parsing Error] %s", err_msg)}
 }
 
+func is_parse_error(n Node) bool {
+	if _, ok := n.(ErrNode); ok {
+		return true
+	} else {
+		return false
+	}
+}
+
 // Checks the current token to be parsed
 func (p *ParserState) peek() Token {
 	return p.tokens[p.pos]
@@ -82,6 +90,35 @@ func (p *ParserState) eat(t TokenType) Token {
 // True if there's still tokens to parse
 func (p *ParserState) more() bool {
 	return p.peek().tk_type != TOKEN_EOF
+}
+
+// Parses only expression terms
+func (p *ParserState) parse_term() Node {
+	tok := p.peek()
+	switch tok.tk_type {
+	case TOKEN_LIT:
+		lit := p.eat(TOKEN_LIT)
+		return LitNode{lit.val}
+	case TOKEN_ID:
+		id := p.eat(TOKEN_ID)
+		return IdNode{id.val}
+	default:
+		return parser_err_node("Not a valid expression term.")
+	}
+}
+
+func (p *ParserState) parse_val_expr() Node {
+	root_node := p.parse_term()
+
+	// Parse binary operations
+	for p.peek().tk_type == TOKEN_OP || p.peek().tk_type == TOKEN_CMP {
+		op := p.eat(p.peek().tk_type)
+		right := p.parse_val_expr()
+		// Left hand gets included and now the operation becomes the root now
+		root_node = BinOpNode{op.val, root_node, right}
+	}
+
+	return root_node
 }
 
 // Do-End block
@@ -121,10 +158,10 @@ func (p *ParserState) parse_next() Node {
 				id:   IdNode{id_tok.val},
 				expr: p.parse_next(),
 			}
-		} else {
-			return IdNode{id_tok.val}
 		}
+		return IdNode{id_tok.val}
 	case TOKEN_LIT:
+		// FIXME: WRONG, must check for operations
 		lit := p.eat(TOKEN_LIT)
 		return LitNode{lit.val}
 	case TOKEN_DO:
@@ -133,9 +170,8 @@ func (p *ParserState) parse_next() Node {
 	case TOKEN_PRINT:
 	case TOKEN_ASSIGN:
 		return parser_err_node("Isolated assignment. `<-` doesn't an identifier.")
-	default:
-		return parser_err_node("Unexpected command.")
 	}
+	return parser_err_node("Unexpected command.")
 }
 
 func Parser(tokens []Token) AST {
